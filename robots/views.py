@@ -1,10 +1,18 @@
 from django.views import View
+from django.shortcuts import render
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from .models import Robot
 from .forms import ValidationForm
 import json
+
+
+def index(request):
+    return render(
+        request,
+        'robots/index.html',
+    )
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -31,3 +39,4 @@ class PostRobotView(View):
             'message': f'New robot has been created with id {robot_obj.id}'
         }
         return JsonResponse(data, status=201)
+    
