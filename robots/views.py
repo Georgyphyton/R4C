@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from .models import Robot
+from .forms import ValidationForm
 import json
 
 
@@ -10,6 +11,12 @@ import json
 class PostRobotView(View):
     def post(self, request):
         post_body = json.loads(request.body)
+        form = ValidationForm(post_body)
+        if not form.is_valid():
+            data = {
+                'message': 'Incorrect data entry format!',
+            }
+            return JsonResponse(data, status=400)
         robot_version = post_body.get('version')
         robot_model = post_body.get('model')
         data = post_body.get('created')
