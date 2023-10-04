@@ -4,8 +4,11 @@ from django.http import JsonResponse, HttpResponse
 from django.db.models import Count
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import EmailMessage
 from datetime import date, timedelta
 from openpyxl import Workbook
+from R4C.settings import EMAIL_HOST_USER
+from orders.models import Order
 from .models import Robot
 from .forms import ValidationForm
 import json
@@ -41,6 +44,15 @@ class PostRobotView(View):
         data = {
             'message': f'New robot has been created with id {robot_obj.id}'
         }
+        orders = Order.objects.all()
+        for order in orders:
+            if order.robot_serial == robot_obj.serial:
+                subject = 'Ваш робот в наличии'
+                body = f'''Добрый день!
+Недавно вы интересовались нашим роботом модели {robot["model"]}, версии {robot["version"]}.
+Этот робот теперь в наличии. Если вам подходит этот вариант - пожалуйста, свяжитесь с нами'''
+                email = EmailMessage(subject, body, EMAIL_HOST_USER, [order.customer.email])
+                email.send()
         return JsonResponse(data, status=201)
     
 def export_to_excel(request):
